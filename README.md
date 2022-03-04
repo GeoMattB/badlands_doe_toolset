@@ -4,3 +4,11 @@ see
 https://badlands.readthedocs.io/
 and
 https://github.com/sebhaan/DoEgen
+
+
+This repository is also available on pip, to install:
+
+
+pip install badlands-doe-toolset
+
+
