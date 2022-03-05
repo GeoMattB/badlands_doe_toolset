@@ -791,11 +791,12 @@ def gridtovts(stratfile,vtsoutfile):
     y=np.repeat(yrs[:, :, np.newaxis],strat.nz,axis=2)
     z = (strat.strat_layers['layDepth'][:]).reshape(strat.ny,strat.nx,strat.nz)
     
-    # Create the dictionary for the point data gridtovtk requires and reshape the inputs to fit.
+    # Create the dictionary for the point attributes data and reshape the inputs to fit.
     layers={}
     for i in strat.strat_attribs:
         if 'layDepth' not in i:
             layers[i] = (strat.strat_layers[i][:]).reshape(strat.ny,strat.nx,strat.nz)
+    
     #pass pyevtk gridToVTK function the data it needs
     gridToVTK(vtsoutfile, x, y, z, pointData = layers)
 
