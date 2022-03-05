@@ -16,6 +16,7 @@ import badlands_doe_toolset.badlands_multiproc_run as mpr
 import ntpath
 from functools import partial
 import matplotlib.pyplot as plt
+from pyevtk.hl import gridToVTK
 
 """ this Stratdata class might be removed and the Stratigraphy class from StratalMesh used instead, however I don't need to reshape the arrays here"""
 class Stratadata:
@@ -39,6 +40,10 @@ class Stratadata:
         x,y = np.hsplit(coords, 2)
         self.x=x
         self.y=y
+        self.dx = x[1]-x[0]
+        self.nx = int((x.max() - x.min())/self.dx+1)
+        self.ny = int((y.max() - y.min())/self.dx+1)
+        self.nz=(df['layDepth']).shape[1]
         #Load all of the attributes with 'lay' in their name, these are the layer properties.
         self.strat_attribs=[]
         for i in df.keys():
@@ -63,6 +68,7 @@ class Stratadata:
         self.dx = x[1]-x[0]
         self.nx = int((x.max() - x.min())/self.dx+1)
         self.ny = int((y.max() - y.min())/self.dx+1)
+        self.nz=(df['layDepth']).shape[1]
        
         
 class TINfile:
@@ -769,5 +775,28 @@ def downstream_node(dsinit,H): #initial downstream node, networkx unmasked array
     numbers=list(map(int, arr)) # array / int conversion as output is list and string
     downnodes=np.unique(numbers) # output is also list of connections, remove duplicates
     return(downnodes) 
+
+## modified version of badlands-companions vtk/vts creator.
+## reshapes rather than iterates to create arrays with correct data and shapes.
+## creates properties in the output of the properties in the sed.time file.
+def gridtovts(stratfile,vtsoutfile):
+    strat=Stratadata()
+    strat.loadStrat(stratfile)
+    
+    #reshape the xy arrays to the grid dimensions, then use np.repeat to make an xy for each layer, reshape z
+    # this is more efficient than layered iterating
+    xrs=strat.x.reshape(strat.ny,strat.nx)
+    yrs=strat.y.reshape(strat.ny,strat.nx)
+    x=np.repeat(xrs[:, :, np.newaxis],strat.nz,axis=2)
+    y=np.repeat(yrs[:, :, np.newaxis],strat.nz,axis=2)
+    z = (strat.strat_layers['layDepth'][:]).reshape(strat.ny,strat.nx,strat.nz)
+    
+    # Create the dictionary for the point data gridtovtk requires and reshape the inputs to fit.
+    layers={}
+    for i in strat.strat_attribs:
+        if 'layDepth' not in i:
+            layers[i] = (strat.strat_layers[i][:]).reshape(strat.ny,strat.nx,strat.nz)
+    #pass pyevtk gridToVTK function the data it needs
+    gridToVTK(vtsoutfile, x, y, z, pointData = layers)
 
 
