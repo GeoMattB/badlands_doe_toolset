@@ -32,7 +32,8 @@ if __name__ == "__main__":
             "numpy",
             "pandas",
             "networkx",
-            "scipy"
+            "scipy",
+            "py-cpuinfo"
         ],
         python_requires=">=3.8",
         classifiers=[

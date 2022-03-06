@@ -356,6 +356,24 @@ this could be modified to vary the sliding window size later.
 
 """
 
+def strat_TerrRough_write_doegen(xml_dir):
+    xm=mpr.XmlList()
+    xm.loadXml(xml_dir)
+    cpuCount = os.cpu_count()
+    print ("number of threads available here: "+str(cpuCount)) 
+    if cpuCount >= 2:
+        proc = int(cpuCount-1) #Number of Processes to run simultaneously X-1 basically uses all the threads available this has been tested to ~20 threads. Bottlenecks   could be the size of the strat file and hard drive r/w speed.
+    else:
+        proc = 1 # simple error check.
+    print ("number of processes assigned: "+str(proc))
+    with Pool(processes = proc) as p:
+        start = time.time()
+        async_result = p.map_async(partial(strat_TerrRough_write), xm.xml_list)
+        p.close()
+        p.join()
+        print('Terrain roughness complete in: ' + str(round((time.time() - start)/60, 2)) + ' minutes')
+
+
 def strat_TerrRough_write(modelfile):
     model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
     modelh5dir=model.outDir+'/h5'
@@ -366,7 +384,7 @@ def strat_TerrRough_write(modelfile):
     strat.loadStratCoords(strat_file)
     
     #just use h5py to load the elev data from the stratal file using the strat class for this loads too many attributes
-    df = h5py.File(strat_file, 'r')
+    df = h5py.File(strat_file, 'r+')
     elev = np.array((df['/layElev']))
     TRI = np.full(elev.shape, -1.0)
     for i in range(0,maxSteps+1):
@@ -384,13 +402,13 @@ def strat_TerrRough_write(modelfile):
         TRI[:,i]=TRI_temp.flatten()
     df.close()    
     #write the results to the strat file
-    with h5py.File(strat_file, 'a') as g:
-        g.require_dataset('layTerrRough', data=TRI, shape=TRI.shape, dtype="f", compression="gzip"  )
+    with h5py.File(strat_file, 'r+') as g:
+        if 'layTerrRough' in g.keys():
+            del g['layTerrRough'] # if the value exists already remove it
+        g.require_dataset('layTerrRough', data=TRI, shape=TRI.shape, dtype="f", compression="gzip" )
         g.close()
         print(str(model.outDir) + '  final strat file written')
 
-#TBA
-#def strat_TerrRough_write_doegen(xml_dir):
 
 class Welldata:
     """
