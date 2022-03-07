@@ -11,4 +11,7 @@ This repository is also available on pip, to install:
 
 pip install badlands-doe-toolset
 
+An example on the functionality and description of how to use this is available here:
+
+https://github.com/GeoMattB/Badlands_DoEgen_SynRift
 
