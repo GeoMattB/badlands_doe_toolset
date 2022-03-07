@@ -1,0 +1,23 @@
+Achknowledgements
+------------------
+Significant parts of this code are based on modifications of other python packages. 
+Specifically:
+
+Badlands:
+* this code makes use of many of the badlands classes.
+
+Badlands-companion
+* parts of the stratal mesh class and some of the vtk generation proccesses have been modified for efficiency or modified from jupyter notebooks.
+* the badlands-companion tools provide an excellent example of how to interact with the badlands outputs and much of this code is a slighty simpler to use, duplication of that.
+
+DoEgen (https://github.com/sebhaan/DoEgen)
+* some of the code from the examples and api documentation.
+
+DoEgen-Geo https://github.com/Sydney-Informatics-Hub/DoEgen-Geo
+* the example pipeline formed the basis for the integration of the DoEgen and DoEval tools with badlands. 
+* The xml generator presented in the DoEgen-Geo example has been extended here is renamed as csv_to_badlands.
+
+Similaritymeasures
+* the wel similarity module implements code from the documnentation/examples.
+
+Stackoverflow
