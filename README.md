@@ -13,5 +13,5 @@ pip install -i https://test.pypi.org/simple/ badlands-doe-toolset
 
 An example on the functionality and description of how to use this is available here:
 
-https://github.com/GeoMattB/Badlands_DoEgen_SynRift
+https://github.com/GeoMattB/Badlands_DOE_examples
 
