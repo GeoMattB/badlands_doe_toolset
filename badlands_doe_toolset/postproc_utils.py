@@ -623,7 +623,9 @@ class Fetchnodes:
     
     def loadFnodes(self,nodefile):
         """
-        Read in the text file for the node locations, this is an example of the format
+        Read in the text file for the node locations, this is an example of the format, 
+        NodeID should ne numeric, preferably an int
+        
         X,Y NodeID
         ---------------start file-----------don't use this line
         526046,5856329,9
@@ -767,7 +769,7 @@ def fetch_area_calculate(fnodes_arr,interp_dist,flow_file,depth=10):
     return(shortlist)
     
 
-#  networkX  finds upstream nodes. Starting point is the list of nodes near basin limits.
+#  networkX  finds upstream nodes. Starting point is the list of nodes near basin limits interpolated using the kdtree.
 def upstream_node(dsinit,G): #initial downstream node, catchment number, network
     alist=[]
     node=list(nx.edge_dfs(G,dsinit, orientation='reverse'))

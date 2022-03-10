@@ -27,7 +27,7 @@ if __name__ == "__main__":
         install_requires=[
             "badlands>=2.2.3",
             "badlands-companion",
-            "similaritymeasures>=0.4.4",
+            "similaritymeasures",
             "doegen",
             "numpy",
             "pandas",
