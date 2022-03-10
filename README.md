@@ -6,9 +6,12 @@ and
 https://github.com/sebhaan/DoEgen
 
 
-This repository is also available on pip, to install:
+This repository is also available on pip testing, to install:
+
+pip install -i https://test.pypi.org/simple/ badlands-doe-toolset
 
 
-pip install badlands-doe-toolset
+An example on the functionality and description of how to use this is available here:
 
+https://github.com/GeoMattB/Badlands_DOE_examples
 
