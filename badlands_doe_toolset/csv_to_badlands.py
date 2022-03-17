@@ -1,7 +1,6 @@
 """
 Ingests DoEgen .csv output to produce a series of Badlands .xml experiment configuration files.
 """
-
 # TODO: These imports seem a bit excessive; go back through and remove unused ones
 import argparse
 import xml.etree.ElementTree as etree
@@ -55,7 +54,7 @@ def badlands_encode(row, *args):
     Function for writing an xml file in badlands format from a pandas df row.
     Current logic depends on df column names to populate the xml file
     The first set of if statements checks to see if the csv (generated from the DoEgen outputs) has specified any complex
-    structures. That is, multiple, variable precipitation, tectonic or erodibility sub- xmls. If so, it loads them as the sting for that section
+    structures. That is, multiple, variable precipitation, tectonic or erodibility sub- xmls. If so, it loads them as the string for that section
     of the configuration.
     """
 # make the dictionaries where there are options.
@@ -65,6 +64,11 @@ def badlands_encode(row, *args):
     carbonate_dict = read_scenarios('carbonate/*.xml')
 
 # Load some optional default values
+    if "boundary" in row.keys():
+        boundary=row['boundary']
+    else: 
+        boundary='fixed'
+
     if "mindt" in row.keys():
         mindt=row['mindt']
     else: 
@@ -270,7 +274,7 @@ def badlands_encode(row, *args):
     if "fillmax" in row.keys():
         fillmax=f"""<fillmax>{row['fillmax']}.</fillmax>"""
     else:
-        fillmax='<fillmax>100</fillmax>'
+        fillmax= '<!-- No fillmax specified, default will be used (200m) -->'
         
 
 # Erodability
@@ -395,7 +399,8 @@ def badlands_encode(row, *args):
     <!-- Regular grid structure -->
     <grid>
         <demfile>data/{row['Initial Topography']}</demfile>
-        <boundary>fixed</boundary>
+        <!-- Boundary type: flat, slope, fixed or wall -->
+        <boundary>{boundary}</boundary>
         <resfactor>{row['resfactor']}</resfactor>
     </grid>
     <!-- Simulation time structure -->
@@ -507,9 +512,9 @@ DoEgen to badlands converter
 Takes a pandas dataframe of the DoEgen .csv output and writes a badlands .xml for every row.
 """
 
-def doegen_to_badlands(input_doegen_df, output_path = None):
+def doegen_to_badlands(input_doegen_df, output_path):
     if output_path is None:
-        output_path = Path('badlands_test_xml/')
+        output_path = Path('badlands_xml/')
 
     os.makedirs(Path(output_path), exist_ok = True)
 
@@ -518,13 +523,13 @@ def doegen_to_badlands(input_doegen_df, output_path = None):
     input_doegen_df.apply(badlands_encode, axis=1, args = args)
 
 
-def main(input_doegen_csv):
+def main(input_doegen_csv, output_path = None):
 #    input_doegen_csv = args.input / args.file
     input_doegen_df = pd.read_csv(input_doegen_csv)
     # set up calculated / dependent parameters
     M=round((input_doegen_df['N']*input_doegen_df['MNrat']),4)
     input_doegen_df['M']=M
-    doegen_to_badlands(input_doegen_df)
+    doegen_to_badlands(input_doegen_df, output_path)
 
 
 #if __name__ == "__main__":

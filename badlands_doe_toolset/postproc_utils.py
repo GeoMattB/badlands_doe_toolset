@@ -53,8 +53,6 @@ class Stratadata:
         for j in self.strat_attribs:
             self.strat_layers[j] = df['/'+j]
            
-#Functions that use these parameters have not been implemented yet so they are not loaded.
-    
     # in some cases only the coordinates are required and this is faster to load (modified from badlands companion)   
     def loadStratCoords(self,stratfile): 
         """
@@ -127,10 +125,10 @@ class Flowfile:
         Read the Badlands HDF5 flow.timeXX file.
         """
         flw_df = h5py.File(flowfile, 'r+')
-        coords = np.array((flw_df['/coords']))
-        self.x=coords[:,0]
-        self.y=coords[:,1]
-        self.z=coords[:,2]
+        self.coords = np.array((flw_df['/coords']))
+        self.x=self.coords[:,0]
+        self.y=self.coords[:,1]
+        self.z=self.coords[:,2]
         self.connect = np.array((flw_df['/connect']))-1
         self.basin=np.array((flw_df['/basin']))
        
@@ -142,15 +140,12 @@ class Flowfile:
         for j in self.flw_keylist:
             self.flw_layer[j] = flw_df['/'+j]
 
-
 """
 Functions to generate post-processing outputs go here.
 interp_from_tin interpolates a single tin.timeXX.hdf5 onto a higher resolution mesh.
 strat_tin_write reads a the final stratal file mesh coordinates and calls interp_from_tin for each timestep, then writes the new attribute to the startal file 
 strat_tin_write_doegen reads a list of experiment xml files from a common directory and calls strat_tin_write for each experiment.
 """
-
-
 
 ### interpolates data from 1 tin file onto the XY coords of a stratal sed.time grid
 def interp_from_tin(X,Y,nx,ny,tin_file,attribs):
@@ -635,17 +630,17 @@ class Fetchnodes:
         """
         self.fnodes=np.loadtxt(open(nodefile), delimiter=",")
         return (self)
-#def init(lock):    # set up the lock function in multiprocessing so there's a slight delay between each process starting.
-#    global starting
-#    starting = lock
-    
+
+
+# calculate the area for all steps in a set of multiple experiments    
 def fetch_area_doegen(xml_dir,fetchnodefile,interp_dist=None):
     xm=mpr.XmlList()
     xm.loadXml(xml_dir)
     for f in xm.xml_list:
         fetchrun=fetch_area_experiment(f,fetchnodefile,interp_dist)    
     return(fetchrun)    
- 
+
+#calculate the fetch area for all steps i a single experiment 
 def fetch_area_experiment(modelfile,fetchnodefile, interp_dist=None):
     fnds=Fetchnodes()
     fnds.loadFnodes(fetchnodefile)
@@ -674,8 +669,9 @@ def fetch_area_experiment(modelfile,fetchnodefile, interp_dist=None):
     print('Fetch area calcs complete for '+model.outDir )
     return (async_result) 
 
-# This is built to account for loops in the flow paths that are sub-parallel to the boundary of the depocenter. If your experiment/model does not contain those 
-# or you don't care then this could be adjusted to skip the loop checks part and run much, much faster. Eg for a coastine with mostly orthogonal flows.
+#determine the fetch areas for a single flowfile (flow.timeXX.hdf5)
+# To account for loops in the flow paths that are sub-parallel to the boundary of the depocenter the oints within the depocetner are removed for the initlal calculations. If your experiment/model does not contain those 
+# you may find that a line describing a shoreline may work better, but this isn't implemented here.
 def fetch_area_calculate(fnodes_arr,interp_dist,flow_file,depth=10):
 
     flw=Flowfile()
@@ -744,7 +740,7 @@ def fetch_area_calculate(fnodes_arr,interp_dist,flow_file,depth=10):
             fetch[f]=sbid[i] #finds all upstream nodes from limits (erosional domain if you've selected a depocenter)
 
 #create new shortlist from unique upstream fetch areas
-#some issues with this returning an index that isn't tracking well. Fix later for minor speed improvement.
+#removed as there were some issues with this returning an index that isn't tracking well. Fix later for minor speed improvement.
 #    uniq_upnodes=np.unique(fetch,return_index=True)[1].tolist()
 
 
