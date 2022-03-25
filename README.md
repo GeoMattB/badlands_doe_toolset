@@ -17,3 +17,9 @@ https://github.com/GeoMattB/Badlands_DOE_examples
 
 
 This research was supported by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney.
+
+It is an extension/implementaton of :
+
+https://github.com/sebhaan/DoEgen
+
+https://github.com/Sydney-Informatics-Hub/DoEgen-Geo
