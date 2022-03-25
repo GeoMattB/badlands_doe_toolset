@@ -16,4 +16,4 @@ An example on the functionality and description of how to use this is available 
 https://github.com/GeoMattB/Badlands_DOE_examples
 
 
-“This research was supported by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney.”
+This research was supported by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney.
