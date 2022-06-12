@@ -17,7 +17,7 @@ if __name__ == "__main__":
         author="Matt Boyd",
         author_email="mboyd@sydney.edu.au",
         url="https://github.com/GeoMattB",
-        version="0.1.3",
+        version="0.1.4",
         description="badlands_doe_toolset is a set of tools to help build and analyse Design of Experiment configurations for badlands modelling",
         ext_modules = [],
         packages=['badlands_doe_toolset'],

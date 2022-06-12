@@ -208,7 +208,7 @@ def strat_tin_write(attribs,modelfile):
 
 
 #This function writes the specified attributes from tin files to the final strata output in a set of DoEgen experiments
-def strat_tin_write_doegen(xml_dir,attribs):
+def strat_tin_write_doegen(xml_dir,attribs,proc=None):
 #    import lib.badlands_multiproc_run as mpr
     xm=mpr.XmlList()
     xm.loadXml(xml_dir)
@@ -219,10 +219,11 @@ def strat_tin_write_doegen(xml_dir,attribs):
     #    print (a)     
     cpuCount = os.cpu_count()
     print ("number of threads available here: "+str(cpuCount)) 
-    if cpuCount >= 2:
-        proc = int(cpuCount-1) #Number of Processes to run simultaneously X-2 basically uses all the threads available this has been tested to ~20 threads. Bottlenecks   could be the size of the strat file and hard drive r/w speed.
-    else:
-        proc = 1 # simple error check.
+    if proc == None:
+        if cpuCount >= 2:
+            proc = int(cpuCount/2) #Number of Processes to run simultaneously X-2 basically uses all the threads available this has been tested to ~20 threads. Bottlenecks   could be the size of the strat file and hard drive r/w speed.
+        else:
+            proc = 1 # simple error check.
     print ("number of processes assigned: "+str(proc))
     with Pool(processes = proc) as p:
         start = time.time()
