@@ -190,19 +190,32 @@ def strat_tin_write(attribs,modelfile):
             dataout[attribs[j]][i]=attributes_interpolate_results[j]
     
     # dataout now needs to be written to the final sed.time file, open the strat file, append each attribute
-    # note, this is an append function and if the attribute already exists it won't be overwritten.    
+    # note, the require_dataset function won't overwrite the attribute if it already exists, so the attribute is first removed if it exists using the if / in statement for each.     
     with h5py.File(strat_file, 'a') as g:
         print('writing to file')
         for i in attribs:
             if i =='cumdiff': 
+                if ('layinstdiff') in g.keys():
+                    del g['layinstdiff'] # if the value exists already remove it
                 print('cumdiff specified, generating instdiff as well')
                 dataout['instdiff']=np.copy(dataout['cumdiff'])
                 dataout['instdiff'][:, 1:] -= dataout['instdiff'][:, :-1]  #cumdiff is more useful as a rate of depostion for that step, subtract previous column (timestep) to get deposition/erosion per step.
                 dataout['instdiff'][:, 0] = 0
                 g.require_dataset(str('layinstdiff'), data=dataout['instdiff'], shape=dataout['instdiff'].shape, dtype="f",compression="gzip" )
-            elif ('lay'+str(i)) in g.keys():
-                del g['lay'+str(i)] # if the value exists already remove it
-            g.require_dataset('lay'+str(i), data=dataout[i], shape=dataout[i].shape, dtype="f",compression="gzip" )
+
+            if i =='cumhill': 
+                if ('layinsthill') in g.keys():
+                    del g['layinsthill'] # if the value exists already remove it
+                print('cumhill specified, generating insthill as well')
+                dataout['insthill']=np.copy(dataout['cumhill'])
+                dataout['insthill'][:, 1:] -= dataout['insthill'][:, :-1]  #cumhill is more useful as a rate of depostion for that step, subtract previous column (timestep) to get deposition/erosion per step.
+                dataout['insthill'][:, 0] = 0
+                g.require_dataset(str('layinsthill'), data=dataout['insthill'], shape=dataout['insthill'].shape, dtype="f",compression="gzip" )
+
+            else:
+                if ('lay'+str(i)) in g.keys():
+                    del g['lay'+str(i)] # if the value exists already remove it
+                g.require_dataset('lay'+str(i), data=dataout[i], shape=dataout[i].shape, dtype="f",compression="gzip" )
         g.close()
         print('completed '+strat_file)
 
