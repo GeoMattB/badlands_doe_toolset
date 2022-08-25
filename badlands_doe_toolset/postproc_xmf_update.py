@@ -91,9 +91,9 @@ def tinfile_xmf(modelfile):
         tmstep=float(i*model.tDisplay)
         cells=len(f['cells'])
         geom=len(f['coords'])
-#        row=pd.DataFrame()
-#        row['cells']=cells,
-#        row['geom']=geom,
+        row=pd.DataFrame()
+        row['cells']=cells,
+        row['geom']=geom,
         texfile=open(xmf_file,'w')
         texfile.write(f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Xdmf SYSTEM "Xdmf.dtd">
@@ -103,34 +103,34 @@ def tinfile_xmf(modelfile):
       <Time Type="Single" Value="{tmstep}"/>
       <Grid Name="Block.0">
          <Topology Type="Triangle" NumberOfElements="{(int(row['cells']))}" BaseOffset="1">
-          <DataItem Format="HDF" DataType="Int" Dimensions="{int(cells)} 2">h5/tin.time{i}.hdf5:/cells</DataItem>
+          <DataItem Format="HDF" DataType="Int" Dimensions="{int(cells)} 3">h5/tin.time{i}.hdf5:/cells</DataItem>
          </Topology>
          <Geometry Type="XYZ">
           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 3">h5/tin.time{i}.hdf5:/coords</DataItem>
          </Geometry>
          <Attribute Type="Scalar" Center="Node" Name="lake">
-          <DataItem Format="HDF" NumberType="Integer" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/lake</DataItem>
+          <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/lake</DataItem>
          </Attribute>
-         <Attribute Type="Scalar" Center="Node" Name="Discharge [m3/s]">
+         <Attribute Type="Scalar" Center="Node" Name="Discharge">
           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/discharge</DataItem>
          </Attribute>
-         <Attribute Type="Scalar" Center="Node" Name="cumdiff">
+         <Attribute Type="Scalar" Center="Node" Name="EroDep">
           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/cumdiff</DataItem>
          </Attribute>
-         <Attribute Type="Scalar" Center="Node" Name="cumhill [m3/s]">
+         <Attribute Type="Scalar" Center="Node" Name="EroDep hillslope">
           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/cumhill</DataItem>
          </Attribute>
-         <Attribute Type="Scalar" Center="Node" Name="cumfail adim">
+         <Attribute Type="Scalar" Center="Node" Name="EroDep failure">
           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/cumfail</DataItem>
          </Attribute>
          <Attribute Type="Scalar" Center="Node" Name="Sealevel">
           <DataItem ItemType="Function" Function="$0 * 0.00000000001 + {SeaLvl}" Dimensions="{int(geom)} 1">
-           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time1.hdf5:/cumdiff</DataItem>
+           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/cumdiff</DataItem>
           </DataItem>
          </Attribute>
          """)
         for g in (f.keys()): ## if there are any new parameters add them to the xmf for paraview.
-            if g !='coords' and g !='cells' and g !='lake' and g !='discharge' and g !='cumdiff' and g !='cumhill' and g !='cumhill' and g !='cumfail' and g !='lake':
+            if g !='coords' and g !='area' and g !='cells' and g !='lake' and g !='discharge' and g !='cumdiff' and g !='cumhill' and g !='cumfail' and g !='lake':
                 texfile.write(f"""
          <Attribute Type="Scalar" Center="Node" Name="{str(g)}">
           <DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="{int(geom)} 1">h5/tin.time{i}.hdf5:/{str(g)}</DataItem>

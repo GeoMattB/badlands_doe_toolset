@@ -163,6 +163,42 @@ def interp_from_tin(X,Y,nx,ny,tin_file,attribs):
     return(attribs_inter)
 
 
+#This function writes the instdiff parameter to the tin.time files. Useful for time-step visualisation in paraview, 
+# could probably be done entirely in PV as a filter but I couldn't work out how to do it dynamically for animations in paraview.
+def tin_write_instdiff(modelfile):
+    model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
+    modelh5dir=model.outDir+'/h5'
+    maxSteps=int(model.tEnd/model.tDisplay)
+
+    #loop through the tin.timeXX loading each as we go.
+    for i in range(0,maxSteps):
+        tin_N=TINfile()
+        tin_N1=TINfile()
+        tin_N.loadTIN(modelh5dir+'/tin.time'+str(i)+'.hdf5')
+        #return(tin_N)
+        tin_N1.loadTIN(modelh5dir+'/tin.time'+str(i+1)+'.hdf5')
+        
+        #this is a bit not-that-useful, it just adds an attribute to the first (zero) layer to keep outputs consistent / tidy.
+        if i==0:
+            instdiff=tin_N.tin_layer['cumdiff'][:]
+            with h5py.File((modelh5dir+'/tin.time'+str(i)+'.hdf5'), 'a') as t:
+                print('tin.time'+str(i))
+                if ('instdiff') in t.keys():
+                    del t['instdiff'] # if the value exists already remove it
+                t.require_dataset('instdiff', data=instdiff, shape=instdiff.shape, dtype="f",compression="gzip" )
+                t.close()
+        
+        # subtracts (layer N) from (layer N+1) and adds it to the tin file, this is the main bit.
+        else:
+            instdiff=(tin_N1.tin_layer['cumdiff'][:])-(tin_N.tin_layer['cumdiff'][:])
+        with h5py.File((modelh5dir+'/tin.time'+str(i+1)+'.hdf5'), 'a') as t:
+            print('tin.time'+str(i+1))
+            if ('instdiff') in t.keys():
+                del t['instdiff'] # if the value exists already remove it
+            t.require_dataset('instdiff', data=instdiff, shape=instdiff.shape, dtype="f",compression="gzip" )
+            t.close()
+
+
 #This function writes the list of supplied parameters in a models tin.time files to the final sed.time file.
 def strat_tin_write(attribs,modelfile):
     model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
