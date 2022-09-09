@@ -1,14 +1,14 @@
 # badlands_doe_toolset
-a set of tools to simply combine the setup and analysis of Badlands using Design of Experiments (DoEgen) python software.
+A set of tools that combines the setup and analysis of Badlands using Design of Experiments (DoEgen) python software.
 see 
 https://badlands.readthedocs.io/
 and
 https://github.com/sebhaan/DoEgen
 
 
-This repository is also available on pip testing, to install:
+This repository is also available on pip, to install:
 
-pip install -i https://test.pypi.org/simple/ badlands-doe-toolset
+pip install badlands-doe-toolset
 
 
 An example on the functionality and description of how to use this is available here:
@@ -23,3 +23,4 @@ It is an extension/implementaton of :
 https://github.com/sebhaan/DoEgen
 
 https://github.com/Sydney-Informatics-Hub/DoEgen-Geo
+ 
