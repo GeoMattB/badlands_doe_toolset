@@ -276,10 +276,14 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
       
     DThick=model_extract['/'+Exp+'/'+Well+'/layinstdiff'][:] 
     DThick=DThick.ravel()
-    DThick=np.abs(np.fft.fft(DThick,norm="ortho"))
-#    DThick_df=pd.DataFrame(DThick)
-#    dtt=DThick_df.rolling(roll_win).mean()
-#    DThick=dtt.to_numpy()
+
+#    DThick=np.abs(np.fft.fft(DThick,norm="ortho"))
+    DThick_df=pd.DataFrame(DThick)
+#    dtt=DThick_df.rolling(roll_win,center=True).mean()
+    dtt=DThick_df.rolling(roll_win,center=True).max()-DThick_df.rolling(roll_win,center=True).min()
+#    dtt=DThick_df.rolling(roll_win,center=True,win_type='gaussian').sum(std=5)
+
+    DThick=dtt.to_numpy()
     
     if expattrib in model_extract['/'+Exp+'/'+Well+'/'].keys():
         exp_log=model_extract['/'+Exp+'/'+Well+'/'+expattrib][:]
@@ -329,7 +333,7 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
     ax1.plot(obsLog_interpol,obsDepth_interp,'g--',label=str(obslog))
     #ax1.legend(loc="center right")
     ax1a=ax1.twiny()
-    ax1a.set_xlim([-5,5])
+#    ax1a.set_xlim([-5,5])
     #ax1a.set_xticks(range(0,125,25))
     #ax1a.set_xticklabels(range(0,125,25))
     ax1a.set(xlabel='Rate of dep m/100kyr')
@@ -351,7 +355,7 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
     ax2.text(0.6, 0.13, textstr, transform=ax2.transAxes, fontsize=12, horizontalalignment='left')
              
     ax2a=ax2.twiny()
-    ax2a.set_xlim([-5, 5])
+#   ax2a.set_xlim([-5, 5])
     #ax2a.set_xticks(range(0,125,25))
     #ax2a.set_xticklabels(range(0,125,25))
     ax2a.set(xlabel='Rate of dep m/100kyr')
