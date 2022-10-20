@@ -17,6 +17,7 @@ import ntpath
 from functools import partial
 import matplotlib.pyplot as plt
 from pyevtk.hl import gridToVTK
+from pathlib import Path
 
 """ this Stratdata class might be removed and the Stratigraphy class from StratalMesh used instead, however I don't need to reshape the arrays here"""
 class Stratadata:
@@ -165,6 +166,7 @@ def interp_from_tin(X,Y,nx,ny,tin_file,attribs):
 
 #This function writes the instdiff parameter to the tin.time files. Useful for time-step visualisation in paraview, 
 # could probably be done entirely in PV as a filter but I couldn't work out how to do it dynamically for animations in paraview.
+# to do use multiproc to speed this up
 def tin_write_instdiff(modelfile):
     model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
     modelh5dir=model.outDir+'/h5'
@@ -454,6 +456,83 @@ def strat_TerrRough_write(modelfile):
         g.close()
         print(str(model.outDir) + '  final strat file written')
 
+#Writes a QGIS compatible TIN mesh ascii file, 
+# write the header and then the triangle cell / node index values
+#assign an index to the cells as well, this is required for the format
+def TIN_hdf_to_2dm(outpath,hdf5_input):
+    g=TINfile()
+    g.loadTIN(hdf5_input)
+    outname=Path(hdf5_input).stem
+    #print(outname)
+    outfile2dm=outpath+'/'+(Path(hdf5_input).stem)+'.2dm'
+
+    with open (outfile2dm,'w') as f:
+            f.write('MESH2D')
+            f.write('\n')
+            f.write(f"MESHNAME, {outname}")
+            f.write('\n')
+            for i in range(0,len(g.cells)):
+                f.write('E3T')
+                f.write(' ')
+                f.write(str(i))
+                f.write(' ')
+                f.write(str(g.cells[i][0]))
+                f.write(' ')
+                f.write(str(g.cells[i][1]))
+                f.write(' ')
+                f.write(str(g.cells[i][2]))
+                f.write('\n')
+            f.close()
+    #append coordinate values to the text file (round XY coords to cm / 2 decimal places)
+    with open(outfile2dm,'a') as f:
+        for i in range(0,len(g.x)):
+            f.write('ND')
+            f.write(' ')
+            f.write(str(i))
+            f.write(' ')
+            f.write(str(round(g.x[i],2)))
+            f.write(' ')
+            f.write(str(round(g.y[i],2)))
+            f.write(' ')
+            f.write(str(round(g.z[i],2)))
+            f.write('\n')
+        f.close()
+
+def experiment_TIN_hdf_to_2dm(modelfile):
+    model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
+    modelh5dir=model.outDir+'/h5'
+    maxSteps=int(model.tEnd/model.tDisplay)
+    model2dmdir=model.outDir+'/2dm'
+    isExist = os.path.exists(model2dmdir)
+    if not isExist:
+        os.makedirs(model2dmdir)
+    #loop through the hdf5 tin files creating the output for each
+    for i in range(0,maxSteps+1):
+        hdf5_input=modelh5dir+'/tin.time'+str(i)+'.hdf5'
+        TIN_hdf_to_2dm(model2dmdir,hdf5_input)
+        
+## multiproc version of the experiment level conversion
+def MP_TIN_hdf_to_2dm(modelfile):
+#    import lib.badlands_multiproc_run as mpr
+    model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
+    modelh5dir=model.outDir+'/h5/'
+    maxSteps=int(model.tEnd/model.tDisplay)
+    model2dmdir=model.outDir+'/2dm/'
+    isExist = os.path.exists(model2dmdir)
+    if not isExist:
+        os.makedirs(model2dmdir)
+    TINlist=[]
+    for i in range(0,maxSteps+1):
+        TINlist.append(modelh5dir+'tin.time'+str(i)+'.hdf5')
+    print (str(len(TINlist))+' surfaces to convert from hdf5 to 2dm for QGIS')
+    cpuCount = os.cpu_count() #lets use all the threads
+    print ("number of threads available here: "+str(cpuCount)) 
+    with Pool(processes = cpuCount) as p:
+        async_result = p.map_async(partial(TIN_hdf_to_2dm,model2dmdir),TINlist)
+        p.close()
+        p.join()
+        print('All outputs written')
+#################
 
 class Welldata:
     """
