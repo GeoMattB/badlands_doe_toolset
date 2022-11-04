@@ -297,8 +297,40 @@ def interp_from_flow(X,Y,nx,ny,flow_file,attribs):
         attrib_temp = attrib_temp.flatten()
         attribs_inter.append(attrib_temp)
     return(attribs_inter)
+    
+# Interpolates a flow files attributes onto a TIN file to make it easy to compare stuff.
+def interp_flow_to_tin(flow_file,tin_file,attribs):
+    #use the Flow class to load the flow array
+    flow=Flowfile()
+    flow.loadFlow(flow_file)
+    attribs_inter=[]
+    tin=TINfile()
+    tin.loadTIN(tin_file)
+    
+    #interpolate the data onto the strata array
+    for i in attribs:
+        attrib_temp = interp.griddata((flow.x, flow.y), flow.flw_layer[i][:] , (tin.x, tin.y), method='nearest')
+        attrib_temp = attrib_temp.flatten()
+        attribs_inter.append(attrib_temp)
+    return(attribs_inter)
 
-#This writes the interp onto the final stratal file for all of flow files in a model.
+#write the flow.time attributes to the tin.tin attributes by interpolation for an entire experiment/model
+def tin_write_flow_experiment(modelfile,attribs):
+    model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
+    modelh5dir=model.outDir+'/h5'
+    maxSteps=int(model.tEnd/model.tDisplay)
+    for i in range(0,maxSteps):
+        tin_file=(modelh5dir+'/tin.time'+str(i)+'.hdf5')
+        flow_file=(modelh5dir+'/flow.time'+str(i)+'.hdf5')
+        attribs_inter=interp_flow_to_tin(flow_file,tin_file,attribs)
+        with h5py.File(tin_file, 'a') as t:
+            for i in range(len(attribs)):
+                if (attribs[i]) in t.keys():
+                    del t[attribs[i]] # if the attribute exists already remove it (possible errors check so we don't remove x/y
+                t.require_dataset(attribs[i], data=attribs_inter[i], shape=attribs_inter[i].shape, dtype="f",compression="gzip" )
+            t.close()
+        
+ #This writes the interp onto the final stratal file for all of flow files in a model.
 def strat_flow_write(attribs,modelfile):
     model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
     modelh5dir=model.outDir+'/h5'

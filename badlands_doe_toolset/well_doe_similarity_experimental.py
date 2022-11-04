@@ -279,11 +279,13 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
 
 #    DThick=np.abs(np.fft.fft(DThick,norm="ortho"))
     DThick_df=pd.DataFrame(DThick)
-#    dtt=DThick_df.rolling(roll_win,center=True).mean()
-    dtt=DThick_df.rolling(roll_win,center=True).max()-DThick_df.rolling(roll_win,center=True).min()
+#    dtt=DThick_df
+    dtt=DThick_df.rolling(roll_win,center=True).mean()
+    dttminmix=DThick_df.rolling(roll_win,center=True).max()-DThick_df.rolling(roll_win,center=True).min()
 #    dtt=DThick_df.rolling(roll_win,center=True,win_type='gaussian').sum(std=5)
 
     DThick=dtt.to_numpy()
+    dttminmix=dttminmix.to_numpy()
     
     if expattrib in model_extract['/'+Exp+'/'+Well+'/'].keys():
         exp_log=model_extract['/'+Exp+'/'+Well+'/'+expattrib][:]
@@ -314,18 +316,19 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
     
     dt = interp.interp1d(Depth,TimeSteps, kind='linear', fill_value='extrapolate')
     expTimesteps=dt(expDepth)
+    #print (expTimesteps)
          
     g = interp.interp1d(obs_depth,obs_log_smooth,  kind='linear', fill_value='extrapolate')
     obsDepth_interp=np.arange(MaxDepth,MinDepth,exp_srm) #these is the depth the logs get resampled/interpolated to yes, its a duplicate of the previous stuff
     obsLog_interpol=g(obsDepth_interp)
         
-    fig, (ax1, ax2,) = plot.subplots(1, 2, figsize=(3,6))
+    fig, (ax1, ax2) = plot.subplots(1, 2, figsize=(3,6))
     
     title=(str(Exp) + ' : \n ' + str(Well))
     fig.suptitle(title, fontsize=16, x=0.05)
     plot.subplots_adjust(right=3)
     
-    ax1.set_title('Depth at well location')
+    ax1.set_title('Depth')
     ax1.set(ylabel="Well Depth")
     ax1.set(xlabel=obslog+' / '+expattrib)
     ax1.set_xlim([-10, 210])
@@ -342,7 +345,7 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
         
                     
     ax2.set_title('Time / model step')
-    ax2.set(ylabel='Time years')
+    ax2.set(ylabel='Time MillYears')
     ax2.set_ylim([tStart, tEnd])
     ax2.set(xlabel=obslog+' / '+expattrib)
     ax2.set_xlim([-10, 210])
