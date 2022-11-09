@@ -13,7 +13,7 @@ pip install badlands-doe-toolset
 
 An example on the functionality and description of how to use this is available here:
 
-https://github.com/GeoMattB/Badlands_DOE_examples
+https://github.com/GeoMattB/Badlands_DoE_synrift
 
 
 The DoEgen component of this research was supported by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney.
