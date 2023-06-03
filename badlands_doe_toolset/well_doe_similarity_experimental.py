@@ -271,21 +271,26 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
         obs_log_smooth = [0,0]
 
 
-    Depth=model_extract['/'+Exp+'/'+Well+'/layDepth'][:]   #/experiment_10/Cast01/Depth')[:]
+    Depth=model_extract['/'+Exp+'/'+Well+'/layDepth'][:]   
     Depth=Depth.ravel()
       
     DThick=model_extract['/'+Exp+'/'+Well+'/layinstdiff'][:] 
     DThick=DThick.ravel()
-
+    
+## Here I examine a pile of different ways of smoothing / weighting the deposition thickness.
 #    DThick=np.abs(np.fft.fft(DThick,norm="ortho"))
     DThick_df=pd.DataFrame(DThick)
 #    dtt=DThick_df
-    dtt=DThick_df.rolling(roll_win,center=True).mean()
-    dttminmix=DThick_df.rolling(roll_win,center=True).max()-DThick_df.rolling(roll_win,center=True).min()
+    dtt=DThick_df.rolling(roll_win,center=True).mean().to_numpy()
+    dttminmix=(DThick_df.rolling(roll_win,center=True).max()-DThick_df.rolling(roll_win,center=True).min()).to_numpy()
+    dttsum=DThick_df.rolling(roll_win,center=True).sum().to_numpy()
 #    dtt=DThick_df.rolling(roll_win,center=True,win_type='gaussian').sum(std=5)
+    dttewm=DThick_df.ewm(span = roll_win).mean().to_numpy()
+    dttcumsum=DThick_df.cumsum().to_numpy()
+    dttmaxsum=((DThick_df.rolling(roll_win,center=True).max()).cumsum()).to_numpy()
 
-    DThick=dtt.to_numpy()
-    dttminmix=dttminmix.to_numpy()
+    #DThick=dttmaxsum
+    DThick=dtt
     
     if expattrib in model_extract['/'+Exp+'/'+Well+'/'].keys():
         exp_log=model_extract['/'+Exp+'/'+Well+'/'+expattrib][:]
@@ -331,24 +336,35 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
     ax1.set_title('Depth')
     ax1.set(ylabel="Well Depth")
     ax1.set(xlabel=obslog+' / '+expattrib)
-    ax1.set_xlim([-10, 210])
+    ax1.set_xlim([2900, 3100])
     ax1.plot(expLog_interpol,expDepth,'b-', label=str(expattrib))
     ax1.plot(obsLog_interpol,obsDepth_interp,'g--',label=str(obslog))
     #ax1.legend(loc="center right")
+    
     ax1a=ax1.twiny()
 #    ax1a.set_xlim([-5,5])
     #ax1a.set_xticks(range(0,125,25))
     #ax1a.set_xticklabels(range(0,125,25))
-    ax1a.set(xlabel='Rate of dep m/100kyr')
+    ax1a.set(xlabel='Rate m/100kyr')
     ax1a.plot(DThick,Depth,'y--',alpha=0.7, label='Rate of Dep.')
     ax1a.legend(loc="upper right")
+        
+#    ax1b=ax1.twiny()
+#    ax1b.set_title('Depth')
+#    ax1b.set(ylabel="Well Depth")
+#    ax1b.set(xlabel=obslog+' / '+expattrib)
+#    ax1b.set(xlabel='Rate m/100kyr')
+#    ax1b.plot(expLog_interpol,expDepth,'b-', label=str(expattrib))
+#    ax1b.plot(obsLog_interpol,obsDepth_interp,'g--',label=str(obslog))
+#    ax1b.plot(dttminmix,Depth,'b--',alpha=0.7, label='Rate of Depo. diff')
+#    ax1b.legend(loc="upper right")
         
                     
     ax2.set_title('Time / model step')
     ax2.set(ylabel='Time MillYears')
     ax2.set_ylim([tStart, tEnd])
     ax2.set(xlabel=obslog+' / '+expattrib)
-    ax2.set_xlim([-10, 210])
+    #ax2.set_xlim([-10, 210])
     
     ax2.plot(expLog_interpol,expTimesteps,'b-', label=str(expattrib))
     ax2.plot(obsLog_interpol,expTimesteps,'g--',label=str(obslog))
@@ -366,7 +382,7 @@ def well_attr_plot(model_extract,Exp,Well,obslog,well_log_file,expattrib,exp_srm
     ax2a.legend(loc="upper right")
     
 #    if writefig==1:   
-    plot.savefig('results_final/plots/'+str(Exp)+'_'+str(Well)+ '.png', dpi=125,bbox_inches='tight')
+    plot.savefig('results_final/plots/'+str(Exp)+'_'+str(Well)+ '.png', dpi=600,bbox_inches='tight')
     plot.show()
 
 

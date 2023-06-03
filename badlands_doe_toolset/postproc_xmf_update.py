@@ -142,4 +142,88 @@ def tinfile_xmf(modelfile):
 </Xdmf>
 """)
     texfile.close()
+ 
+# XMF for sed time strat files
+# single xmf build write the xmf to view in paraview
+def sedfile_xmf(hdf_file,modelinc,tDisplay=100000)  
+        print ('load '+hdf_file)
+        strat=ppu.Stratadata()
+        strat.loadStrat(hdf_file)
+        f=h5py.File(hdf_file, 'r')
+        tmstep=modelinc*tDisplay
+        NumberOfElements=str(strat.ny)+' ' +str(strat.nx) + ' ' +str(strat.nz)
+        Dimensions= str(len(strat.x))+' '+ str(strat.nz)
+        print(Dimensions)
+        xmf_file='xmf/sed.time'+str(modelinc)+'.xmf'
+        print ('output will be '+xmf_file)
+        
+        texfile=open(xmf_file,'w')
+        texfile.write(f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd">
+<Xdmf Version="2.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+ <Domain>
+  <Grid GridType="Collection" CollectionType="Spatial">
+  <Time Type="Single" Value="{tmstep}"/>
+    <Grid Name="Block.0" GridType="Uniform">
+     <Topology TopologyType="3DSMesh" Format="HDF" NumberOfElements="{NumberOfElements}" BaseOffset="1">
+     </Topology>
+      <Geometry GeometryType="X_Y_Z">
+        <DataItem Name="X" Dimensions="{Dimensions}" NumberType="Float" Precision="4" Format="HDF"> {hdf_file}:/X </DataItem>
+        <DataItem Name="Y" Dimensions="{Dimensions}" NumberType="Float" Precision="4" Format="HDF"> {hdf_file}:/Y </DataItem>
+        <DataItem Name="Z" Dimensions="{Dimensions}" NumberType="Float" Precision="4" Format="HDF"> {hdf_file}:/layDepth </DataItem>
+      </Geometry>
+""")
+        for g in (f.keys()): ## if there are any other attributes add them to the xmf for paraview.
+            if g !='X' and g !='Y' and g !='coords':
+                texfile.write(f"""
+      <Attribute Type="Scalar" Center="Node" Name="{str(g)}">
+        <DataItem Dimensions="{NumberOfElements}" Format="HDF" NumberType="Float" Precision="4"> {hdf_file}:/{str(g)} </DataItem>
+      </Attribute>""")
+        texfile.write(f""" 
+    
+    </Grid>
+   </Grid>
+ </Domain>
+</Xdmf>
+""")
+    texfile.close()
+
+
+#write all of the xmf files and then the XDMF for a time series. 
+def sedfile_xdmf(modelfile):
+    model=xmlParser.xmlParser(modelfile,'False') #just read in the xml 'False' stops it writing output directories'
+    modelh5dir=model.outDir+'/h5'
+    maxSteps=int(model.tEnd/model.tDisplay)
+    modelXmfdir=model.outDir+'/xmf'
+    SeaLvl=model.seapos
+    
+    ## send to xmf function
+    for i in range(1,maxSteps+1):
+        hdf_file=modelh5dir+'/sed.time'+str(i)+'.hdf5'
+        sedfile_xmf(hdf_file,i)
+  
+##XMDF part
+#Write the xdmf time series file to tie this all together
+    xdmf_file=model.outDir+'/sedtime_series.xdmf'
+    texfile=open(xdmf_file,'w')
+    texfile.write(f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd">
+<Xdmf Version="2.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+ <Domain>
+    <Grid GridType="Collection" CollectionType="Temporal">
+""")
+    for i in range(1,maxSteps+1):
+        xmf_file=str(modelXmfdir)+'/sed.time'+str(i)+'.xmf'
+        texfile.write(f"""     <xi:include href="xmf/sed.time{i}.xmf" xpointer="xpointer(//Xdmf/Domain/Grid)"/>
+""")
+    
+    texfile.write(f"""  </Grid>
+ </Domain>
+</Xdmf>
+""")
+    texfile.close()   
+    
+    
+
+    
     

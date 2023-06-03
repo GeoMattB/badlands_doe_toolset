@@ -670,8 +670,8 @@ class Wellmodel():
     
     def extractWellsExperiment(self,modelfile,wellfile,outfile_loc): #was extractWellsModel
         """
-        Get the well locations from the wellfile then extract the 
-        Then extract the properties at the well
+        Get the well locations from the wellfile
+        and extract the properties at the well for all of the layers
         """
         h5file=h5py.File(str(outfile_loc),'a')
         
