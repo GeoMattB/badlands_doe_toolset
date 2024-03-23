@@ -178,7 +178,10 @@ def tin_write_instdiff(modelfile):
         tin_N1=TINfile()
         tin_N.loadTIN(modelh5dir+'/tin.time'+str(i)+'.hdf5')
         #return(tin_N)
-        tin_N1.loadTIN(modelh5dir+'/tin.time'+str(i+1)+'.hdf5')
+        if i != maxSteps:
+            tin_N1.loadTIN(modelh5dir+'/tin.time'+str(i+1)+'.hdf5')
+        elif i == maxSteps:
+            tin_N1.loadTIN(modelh5dir+'/tin.time'+str(i)+'.hdf5')
         
         #this is a bit not-that-useful, it just adds an attribute to the first (zero) layer to keep outputs consistent / tidy.
         if i==0:

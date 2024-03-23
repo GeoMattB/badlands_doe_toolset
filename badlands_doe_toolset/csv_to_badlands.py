@@ -96,7 +96,7 @@ def badlands_encode(row, *args):
     if 'Tectonic' in row.keys():
         try:
             tectonic_structure = tectonic_dict[row['Tectonic']]
-        except(KeyError): # this is the error returned if the specified xml file is not found.
+        except(UnboundLocalError): # this is the error returned if the specified xml file is not found.
             print('No Tectonic structure files found')
     elif 'dstart' in row.keys():
         tectonic_structure=f"""    <tectonic>
@@ -119,7 +119,7 @@ def badlands_encode(row, *args):
     if '.xml' in str(row['Precipitation']):
         try:
             precipitation_structure = precipitation_dict[row['Precipitation']]
-        except(KeyError): # this is the error returned if the specified xml file is not found.
+        except(UnboundLocalError): # this is the error returned if the specified xml file is not found.
             print('No precipitation structure files found using single event climate values')
     else:
         precipitation_structure = f"""<!-- Precipitation structure -->
@@ -281,7 +281,7 @@ def badlands_encode(row, *args):
     if '.xml' in str(row['Erodibility']):
         try:
             erodibility_structure = erodability_dict[row['Erodibility']]
-        except(KeyError): # this is the error returned if the specified xml file is not found.
+        except(UnboundLocalError): # this is the error returned if the specified xml file is not found.
             print('No Erodibility structure files found using single Erodibility values')
     else:
         erodability_structure = f"""<erodibility>{row['Erodibility']}</erodibility>"""         
@@ -365,7 +365,7 @@ def badlands_encode(row, *args):
     if 'Carbonate' in row.keys():
         try:
             carbonate_structure = carbonate_dict[row['Carbonate']]
-        except(KeyError): # this is the error returned if the specified xml file is not found.
+        except(UnboundLocalError): # this is the error returned if the specified xml file is not found.
             print('No carbonate structure files found')
     elif 'tcarb' in row.keys():
         carbonate_structure=f"""<carb>

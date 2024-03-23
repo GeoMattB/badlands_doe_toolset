@@ -27,7 +27,7 @@ def flowfile_xmf(modelfile):
         xmf_file=str(modelXmfdir)+'/flow.time'+str(i)+'.xmf'
         print ('output will be '+xmf_file)
         f=h5py.File(hdf_file, 'r')
-        tmstep=float(i*model.tDisplay)
+        tmstep=float(model.tStart+(i*model.tDisplay))
         conshp=len(f['connect'])
         geom=len(f['coords'])
 #        row=pd.DataFrame()
@@ -88,7 +88,7 @@ def tinfile_xmf(modelfile):
         xmf_file=str(modelXmfdir)+'/tin.time'+str(i)+'.xmf'
         print ('output will be '+xmf_file)
         f=h5py.File(hdf_file, 'r')
-        tmstep=float(i*model.tDisplay)
+        tmstep=float(model.tStart+(i*model.tDisplay))
         cells=len(f['cells'])
         geom=len(f['coords'])
         row=pd.DataFrame()
@@ -145,7 +145,7 @@ def tinfile_xmf(modelfile):
  
 # XMF for sed time strat files
 # single xmf build write the xmf to view in paraview
-def sedfile_xmf(hdf_file,modelinc,tDisplay=100000)  
+def sedfile_xmf(hdf_file,modelinc,tDisplay=100000):  
         print ('load '+hdf_file)
         strat=ppu.Stratadata()
         strat.loadStrat(hdf_file)
@@ -186,7 +186,7 @@ def sedfile_xmf(hdf_file,modelinc,tDisplay=100000)
  </Domain>
 </Xdmf>
 """)
-    texfile.close()
+        texfile.close()
 
 
 #write all of the xmf files and then the XDMF for a time series. 
