@@ -1,4 +1,4 @@
-# badlands_doe_toolset
+# badlands-DoE-Toolset
 A set of tools that combines the setup and analysis of Badlands using Design of Experiments (DoEgen) python software.
 see 
 https://badlands.readthedocs.io/
