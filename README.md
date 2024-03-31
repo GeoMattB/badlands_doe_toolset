@@ -1,4 +1,6 @@
 # Badlands-DoE-Toolset
+I built this toolset to undertake the analysis fo the results from the Badlands models I built for my Masters at the University of Sydney.
+
 A set of tools that combines the setup and analysis of Badlands using Design of Experiments (DoEgen) python software.
 * Template to setup and run the DoEgen design of experiments (DoE) python software that will generate the design for multiple experiments.
 * A utility to automatically build the Badlands experiment configuration files
