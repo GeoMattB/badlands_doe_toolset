@@ -23,6 +23,8 @@ An example on the functionality and description of how to use this is available 
 
 https://github.com/GeoMattB/Badlands_DoE_synrift
 
+At the moment the best way to cite this is :  Boyd, M. (2024). Badlands DoE Toolset (Version 1.0) [Computer software] <a href="https://zenodo.org/doi/10.5281/zenodo.10892652"><img src="https://zenodo.org/badge/465976972.svg" alt="DOI"></a>
+
 
 The DoEgen component of this research was supported by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney.
 
